@@ -1,6 +1,7 @@
 from selenium import webdriver
 import time
 from bs4 import BeautifulSoup
+import markdown
 
 
 YEAR = '2024'
@@ -114,11 +115,8 @@ def create_markdown(filtered_and_sorted_book_list, year, md_file_path):
 
     with open(md_file_path, 'w', encoding="utf-8") as f:
         f.write('---\n')
-        f.write('layout: post\n')
         f.write(f'title: My Year in Books - {year}\n')
-        # f.write(f'excerpt: {year} was a good year in terms of reading\n')
         f.write('---\n')
-        # f.write(f'{intro_para}\n')
 
         # loop over book list and create md paragraphs for each book
         for i in range(len(filtered_and_sorted_book_list)):
@@ -135,7 +133,7 @@ def create_markdown(filtered_and_sorted_book_list, year, md_file_path):
             e = basename.index('_.') + 1
             new_basename = basename[:s] + basename[e:]
             big_cover_url = small_cover_url.replace(basename, new_basename)
-            f.write(f'<img src="{big_cover_url}" alt="cover image" style="height: 300px; width: 200px; float: left; padding-right: 20px; padding-bottom: 5px; padding-top: 5px;>"')
+            f.write(f'<img src="{big_cover_url}" alt="cover image" style="height: 300px; width: 200px; float: left; padding-right: 20px; padding-bottom: 5px; padding-top: 5px;">')
 
             # author_name, author_url
             author_str = curr_book['author_name']
@@ -154,8 +152,13 @@ def create_markdown(filtered_and_sorted_book_list, year, md_file_path):
             f.write('<br clear="all"><br>\n\n\n\n')
 
     print('Markdown created !!')
-
-
+    print("Converting Markdown to Raw HTML ....")
+    with open(md_file_path, 'r', encoding='utf-8') as md_file:
+        markdown_text = md_file.read()
+    html = markdown.markdown(markdown_text)
+    with open('goodreadsreviews.html', 'w', encoding='utf-8') as html_file:
+        html_file.write(html)
+    print("HTML created !!")
 
 if __name__ == '__main__':
     html_str = get_html_using_selenium(MAIN_URL)
@@ -165,3 +168,6 @@ if __name__ == '__main__':
     filtered_and_sorted_book_list = filter_and_sort_books(book_list, YEAR)
 
     create_markdown(filtered_and_sorted_book_list, YEAR, OUTPUT_MD_FILE_PATH)
+
+
+
